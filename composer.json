@@ -1,0 +1,22 @@
+{
+  "name": "amphp/react-adapter",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Niklas Keller",
+      "email": "me@kelunik.com"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/amphp/react-adapter/issues"
+  },
+  "require": {
+    "async-interop/event-loop": "^0.5",
+    "react/event-loop": "^0.4.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Amp\\ReactAdapter\\": "lib"
+    }
+  }
+}
