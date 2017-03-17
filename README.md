@@ -1,10 +1,9 @@
-# template
+# react-adapter
 
 ![Unstable](https://img.shields.io/badge/api-unstable-orange.svg?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)
 
-
-`amphp/react-adapter` is an adapter to allow the usage of any React library to work with the [`amp`](https://github.com/amphp/amp) event loop.
+`amphp/react-adapter` makes any ReactPHP library work with [Amp](https://github.com/amphp/amp).
 
 **Required PHP Version**
 
@@ -13,5 +12,5 @@
 **Installation**
 
 ```bash
-$ composer require amphp/react-adapter
+composer require amphp/react-adapter
 ```
