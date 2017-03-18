@@ -17,6 +17,9 @@
   "autoload": {
     "psr-4": {
       "Amp\\ReactAdapter\\": "lib"
-    }
+    },
+    "files": [
+      "lib/functions.php"
+    ]
   }
 }
