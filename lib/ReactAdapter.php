@@ -2,7 +2,7 @@
 
 namespace Amp;
 
-use AsyncInterop\Loop\Driver;
+use Amp\Loop\Driver;
 use React\EventLoop\LoopInterface;
 use React\EventLoop\Timer\Timer;
 use React\EventLoop\Timer\TimerInterface;

@@ -11,7 +11,7 @@
     "issues": "https://github.com/amphp/react-adapter/issues"
   },
   "require": {
-    "async-interop/event-loop": "^0.5",
+    "amphp/amp": "dev-master as 2.0",
     "react/event-loop": "^0.4.2"
   },
   "autoload": {
