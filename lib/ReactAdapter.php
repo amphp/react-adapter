@@ -2,6 +2,7 @@
 
 namespace Amp\ReactAdapter;
 
+use Amp\Loop;
 use Amp\Loop\Driver;
 use React\EventLoop\LoopInterface;
 use React\EventLoop\Timer\Timer;
@@ -15,7 +16,7 @@ class ReactAdapter implements LoopInterface {
     private $writeWatchers = [];
     private $timers = [];
 
-    public function __construct(Driver $driver) {
+    private function __construct(Driver $driver) {
         $this->driver = $driver;
     }
 
@@ -232,5 +233,15 @@ class ReactAdapter implements LoopInterface {
      */
     public function stop() {
         $this->driver->stop();
+    }
+
+    public static function get(): LoopInterface {
+        if ($loop = Loop::getState(self::class)) {
+            return $loop;
+        }
+
+        Loop::setState(self::class, $loop = new self(Loop::get()));
+
+        return $loop;
     }
 }
