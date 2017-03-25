@@ -27,11 +27,16 @@ class ReactAdapter implements LoopInterface {
      * @param callable $listener Invoked when the stream is ready.
      */
     public function addReadStream($stream, callable $listener) {
+        if (isset($this->readWatchers[(int) $stream])) {
+            // Double watchers are silently ignored by ReactPHP
+            return;
+        }
+
         $watcher = $this->driver->onReadable($stream, function () use ($stream, $listener) {
             $listener($stream, $this);
         });
 
-        $this->readWatchers[(int) $stream][] = $watcher;
+        $this->readWatchers[(int) $stream] = $watcher;
     }
 
     /**
@@ -41,11 +46,16 @@ class ReactAdapter implements LoopInterface {
      * @param callable $listener Invoked when the stream is ready.
      */
     public function addWriteStream($stream, callable $listener) {
+        if (isset($this->writeWatchers[(int) $stream])) {
+            // Double watchers are silently ignored by ReactPHP
+            return;
+        }
+
         $watcher = $this->driver->onWritable($stream, function () use ($stream, $listener) {
             $listener($stream, $this);
         });
 
-        $this->writeWatchers[(int) $stream][] = $watcher;
+        $this->writeWatchers[(int) $stream] = $watcher;
     }
 
     /**
@@ -60,9 +70,7 @@ class ReactAdapter implements LoopInterface {
             return;
         }
 
-        foreach ($this->readWatchers[$key] as $watcher) {
-            $this->driver->cancel($watcher);
-        }
+        $this->driver->cancel($this->readWatchers[$key]);
 
         unset($this->readWatchers[$key]);
     }
@@ -79,9 +87,7 @@ class ReactAdapter implements LoopInterface {
             return;
         }
 
-        foreach ($this->writeWatchers[$key] as $watcher) {
-            $this->driver->cancel($watcher);
-        }
+        $this->driver->cancel($this->writeWatchers[$key]);
 
         unset($this->writeWatchers[$key]);
     }
