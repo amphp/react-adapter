@@ -1,6 +1,6 @@
 <?php
 
-namespace Amp;
+namespace Amp\ReactAdapter;
 
 use Amp\Loop\Driver;
 use React\EventLoop\LoopInterface;
@@ -109,12 +109,13 @@ class ReactAdapter implements LoopInterface {
     public function addTimer($interval, callable $callback) {
         $timer = new Timer($this, $interval, $callback, false);
 
-        $this->timers[spl_object_hash($timer)] = $timer;
-        $this->driver->delay((int) (1000 * $interval), function () use ($timer, $callback) {
+        $watcher = $this->driver->delay((int) (1000 * $interval), function () use ($timer, $callback) {
             $this->cancelTimer($timer);
 
             $callback($timer);
         });
+
+        $this->timers[spl_object_hash($timer)] = $watcher;
 
         return $timer;
     }
