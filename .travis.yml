@@ -1,0 +1,25 @@
+language: php
+
+php:
+  - 7.0
+  - 7.1
+  - nightly
+
+matrix:
+  allow_failures:
+    - php: nightly
+  fast_finish: true
+
+install:
+  composer update -n --prefer-dist
+
+script:
+  - phpdbg -qrr vendor/bin/phpunit --coverage-text --coverage-clover build/logs/clover.xml
+
+after_success:
+  - composer require satooshi/php-coveralls dev-master
+  - travis_retry php vendor/bin/coveralls -v
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
