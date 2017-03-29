@@ -12,7 +12,9 @@ class AdapterTest extends AbstractLoopTest {
         Loop::set(new NativeDriver);
 
         // FIXME: Remove once https://github.com/reactphp/event-loop/pull/92 is merged
-        \define("HHVM_VERSION", true);
+        if (!\defined("HHVM_VERSION")) {
+            \define("HHVM_VERSION", true);
+        }
 
         parent::setUp();
     }
