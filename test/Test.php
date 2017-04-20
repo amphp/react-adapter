@@ -3,14 +3,11 @@
 namespace Amp\ReactAdapter\Test;
 
 use Amp\Loop;
-use Amp\Loop\NativeDriver;
 use Amp\ReactAdapter\ReactAdapter;
 use React\Tests\EventLoop\AbstractLoopTest;
 
-class AdapterTest extends AbstractLoopTest {
+class Test extends AbstractLoopTest {
     public function setUp() {
-        Loop::set(new NativeDriver);
-
         // FIXME: Remove once https://github.com/reactphp/event-loop/pull/92 is merged
         if (!\defined("HHVM_VERSION")) {
             \define("HHVM_VERSION", true);
@@ -20,6 +17,7 @@ class AdapterTest extends AbstractLoopTest {
     }
 
     public function createLoop() {
+        Loop::set(new Loop\NativeDriver);
         return ReactAdapter::get();
     }
 }

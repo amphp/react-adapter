@@ -24,6 +24,7 @@
   },
   "autoload-dev": {
     "psr-4": {
+      "Amp\\ReactAdapter\\Test\\": "test",
       "React\\Tests\\EventLoop\\": "vendor/react/event-loop/tests"
     }
   }
