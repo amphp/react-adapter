@@ -5,8 +5,6 @@ namespace Amp\ReactAdapter\Test;
 use Amp\Loop;
 use Amp\ReactAdapter\ReactAdapter;
 
-// Bug report: https://github.com/bwoebi/php-uv/issues/35
-
 class UvTest extends Test {
     public function createLoop() {
         if (!Loop\UvDriver::isSupported()) {
