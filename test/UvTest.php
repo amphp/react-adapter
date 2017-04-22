@@ -9,8 +9,6 @@ use Amp\ReactAdapter\ReactAdapter;
 
 class UvTest extends Test {
     public function createLoop() {
-        $this->markTestSkipped("Memory streams are currently unsupported");
-
         if (!Loop\UvDriver::isSupported()) {
             $this->markTestSkipped("UV extension required");
         }

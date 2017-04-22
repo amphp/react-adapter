@@ -9,8 +9,6 @@ use Amp\ReactAdapter\ReactAdapter;
 
 class EvTest extends Test {
     public function createLoop() {
-        $this->markTestSkipped("Memory streams are currently unsupported");
-
         if (!Loop\EvDriver::isSupported()) {
             $this->markTestSkipped("EV extension required");
         }
