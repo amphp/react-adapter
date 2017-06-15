@@ -13,15 +13,12 @@ matrix:
   fast_finish: true
 
 install:
-  - composer install
-  - vendor/amphp/amp/travis/install-uv.sh
-  - vendor/amphp/amp/travis/install-ev.sh
-  - vendor/amphp/amp/travis/install-event.sh
-
-before_script:
   # --ignore-platform-reqs, because https://github.com/FriendsOfPHP/PHP-CS-Fixer/pull/2722
   - composer update -n --prefer-dist --ignore-platform-reqs
   - composer require satooshi/php-coveralls dev-master --ignore-platform-reqs
+  - vendor/amphp/amp/travis/install-uv.sh
+  - vendor/amphp/amp/travis/install-ev.sh
+  - vendor/amphp/amp/travis/install-event.sh
 
 script:
   - phpdbg -qrr vendor/bin/phpunit --coverage-text --coverage-clover build/logs/clover.xml
