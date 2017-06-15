@@ -1,31 +1,34 @@
 {
-  "name": "amphp/react-adapter",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Niklas Keller",
-      "email": "me@kelunik.com"
+    "name": "amphp/react-adapter",
+    "description": "Adapter to make any ReactPHP library compatible with Amp.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Niklas Keller",
+            "email": "me@kelunik.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/amphp/react-adapter/issues",
+        "irc": "irc://irc.freenode.org/amphp"
+    },
+    "require": {
+        "amphp/amp": "^2",
+        "react/event-loop": "^0.4.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8",
+        "friendsofphp/php-cs-fixer": "^2.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Amp\\ReactAdapter\\": "lib"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Amp\\ReactAdapter\\Test\\": "test",
+            "React\\Tests\\EventLoop\\": "vendor/react/event-loop/tests"
+        }
     }
-  ],
-  "support": {
-    "issues": "https://github.com/amphp/react-adapter/issues"
-  },
-  "require": {
-    "amphp/amp": "dev-master as 2.0",
-    "react/event-loop": "^0.4.2"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "^4.8"
-  },
-  "autoload": {
-    "psr-4": {
-      "Amp\\ReactAdapter\\": "lib"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Amp\\ReactAdapter\\Test\\": "test",
-      "React\\Tests\\EventLoop\\": "vendor/react/event-loop/tests"
-    }
-  }
 }
