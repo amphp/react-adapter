@@ -1,4 +1,5 @@
 PHP_BIN := php
+PHPDBG_BIN := phpdbg
 COMPOSER_BIN := composer
 
 COVERAGE = coverage
@@ -31,6 +32,10 @@ deps-update:
 .PHONY: phpunit
 phpunit: setup
 	$(PHP_BIN) vendor/bin/phpunit
+
+.PHONY: coverage
+coverage: setup
+	$(PHPDBG_BIN) -qrr vendor/bin/phpunit --coverage-html=$(COVERAGE)
 
 .PHONY: code-style
 code-style: setup
