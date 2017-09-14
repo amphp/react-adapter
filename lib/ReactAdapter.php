@@ -16,7 +16,7 @@ class ReactAdapter implements LoopInterface {
     private $writeWatchers = [];
     private $timers = [];
 
-    private function __construct(Driver $driver) {
+    public function __construct(Driver $driver) {
         $this->driver = $driver;
     }
 
