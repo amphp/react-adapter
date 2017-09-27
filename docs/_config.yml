@@ -4,9 +4,10 @@ kramdown:
 
 baseurl: "/react-adapter"
 layouts_dir: ".shared/layout"
+includes_dir: ".shared/includes"
 
 exclude: ["Gemfile", "Gemfile.lock", "README.md", "vendor"]
-include: [".shared"]
+safe: true
 
 repository: amphp/react-adapter
 gems:
@@ -19,5 +20,7 @@ defaults:
      type: "pages"
    values:
      layout: "docs"
+     description: "amphp/react-adapter is an adapter to make any ReactPHP library compatible with Amp."
+     keywords: ["amphp", "amp", "reactphp", "adapter", "php", "event-loop"]
 
-asset_path: "/react-adapter/.shared/asset"
+shared_asset_path: "/react-adapter/asset"
