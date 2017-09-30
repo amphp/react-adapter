@@ -2,7 +2,7 @@
 title: Adapter for ReactPHP's Event Loop
 permalink: /
 ---
-`amphp/react-adapter` makes any ReactPHP library work with Amp.
+`amphp/react-adapter` makes any [ReactPHP](https://reactphp.org/) library work with [Amp](https://amphp.org/amp/).
 
 ## Installation
 
@@ -11,6 +11,8 @@ composer require amphp/react-adapter
 ```
 
 ## Usage
+
+Everywhere where a ReactPHP library requires an instance of `LoopInterface`, you just pass `ReactAdapter::get()` to run the ReactPHP library on the Amp event loop.
 
 ```php
 <?php
@@ -35,4 +37,8 @@ Loop::run(function () {
 });
 ```
 
-Everywhere where a ReactPHP library requires an instance of `LoopInterface`, you just pass `ReactAdapter::get()` to run the ReactPHP library on the Amp event loop.
+You can also use the adapter to run ReactPHP apps on an Amp event loop implementation without relying on Amp's global event loop.
+
+```php
+$loop = new Amp\ReactAdapter\ReactAdapter((new Amp\Loop\DriverFactory)->create());
+```

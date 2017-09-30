@@ -5,10 +5,14 @@
 ![Stable](https://img.shields.io/badge/v1-stable-green.svg?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)
 
-`amphp/react-adapter` makes any ReactPHP library work with [Amp](https://github.com/amphp/amp).
+`amphp/react-adapter` makes any [ReactPHP](https://reactphp.org/) library compatible with [Amp](https://github.com/amphp/amp).
 
 ## Installation
 
 ```bash
 composer require amphp/react-adapter
 ```
+
+## Documentation
+
+Documentation is available on [amphp.org/react-adapter](https://amphp.org/react-adapter/).
