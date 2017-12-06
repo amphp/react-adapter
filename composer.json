@@ -30,5 +30,10 @@
             "Amp\\ReactAdapter\\Test\\": "test",
             "React\\Tests\\EventLoop\\": "vendor/react/event-loop/tests"
         }
+    },
+    "config": {
+        "platform": {
+            "php": "7.0.0"
+        }
     }
 }
