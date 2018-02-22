@@ -16,3 +16,7 @@ composer require amphp/react-adapter
 ## Documentation
 
 Documentation is available on [amphp.org/react-adapter](https://amphp.org/react-adapter/).
+
+## Notes
+
+If you need to convert a ReactPHP promise to an Amp promise, check the [umbri/amp-react-interop](https://github.com/umbri/amp-react-interop) package.
