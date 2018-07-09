@@ -26,6 +26,4 @@ class EventTimerTest extends TimerTest {
     public function testAddPeriodicTimerCancelsItself() {
         $this->markTestSkipped("Often fails, needs further investigation.");
     }
-
-
 }
