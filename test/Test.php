@@ -9,15 +9,6 @@ use React\Tests\EventLoop\AbstractLoopTest;
 class Test extends AbstractLoopTest {
     private $fifoPath;
 
-    public function setUp() {
-        // FIXME: Remove once https://github.com/reactphp/event-loop/pull/92 is merged
-        if (!\defined("HHVM_VERSION")) {
-            \define("HHVM_VERSION", true);
-        }
-
-        parent::setUp();
-    }
-
     public function tearDown() {
         if (file_exists($this->fifoPath)) {
             unlink($this->fifoPath);

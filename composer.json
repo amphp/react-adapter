@@ -17,8 +17,13 @@
         "react/event-loop": "^0.4.2"
     },
     "require-dev": {
-        "phpunit/phpunit": "^4.8",
+        "phpunit/phpunit": "^6.0",
         "friendsofphp/php-cs-fixer": "^2.3"
+    },
+    "suggest": {
+        "ext-ev": "Required for PHPUnit tests requiring ev extension",
+        "ext-event": "Required for PHPUnit tests requiring event extension",
+        "ext-uv": "Required for PHPUnit tests requiring uv extension"
     },
     "autoload": {
         "psr-4": {
