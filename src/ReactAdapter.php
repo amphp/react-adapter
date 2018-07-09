@@ -6,15 +6,15 @@ use Amp\Loop;
 use Amp\Loop\Driver;
 use React\EventLoop\LoopInterface;
 use React\EventLoop\Timer\Timer;
-use React\EventLoop\Timer\TimerInterface;
+use React\EventLoop\TimerInterface;
 
 class ReactAdapter implements LoopInterface {
     private $driver;
 
-    private $inNextTick = false;
     private $readWatchers = [];
     private $writeWatchers = [];
     private $timers = [];
+    private $signalWatchers = [];
 
     public function __construct(Driver $driver) {
         $this->driver = $driver;
@@ -26,7 +26,7 @@ class ReactAdapter implements LoopInterface {
      * @param resource $stream The PHP stream resource to check.
      * @param callable $listener Invoked when the stream is ready.
      */
-    public function addReadStream($stream, callable $listener) {
+    public function addReadStream($stream, $listener) {
         if (isset($this->readWatchers[(int) $stream])) {
             // Double watchers are silently ignored by ReactPHP
             return;
@@ -45,7 +45,7 @@ class ReactAdapter implements LoopInterface {
      * @param resource $stream The PHP stream resource to check.
      * @param callable $listener Invoked when the stream is ready.
      */
-    public function addWriteStream($stream, callable $listener) {
+    public function addWriteStream($stream, $listener) {
         if (isset($this->writeWatchers[(int) $stream])) {
             // Double watchers are silently ignored by ReactPHP
             return;
@@ -93,16 +93,6 @@ class ReactAdapter implements LoopInterface {
     }
 
     /**
-     * Remove all listeners for the given stream.
-     *
-     * @param resource $stream The PHP stream resource.
-     */
-    public function removeStream($stream) {
-        $this->removeReadStream($stream);
-        $this->removeWriteStream($stream);
-    }
-
-    /**
      * Enqueue a callback to be invoked once after the given interval.
      *
      * The execution order of timers scheduled to execute at the same time is
@@ -113,8 +103,8 @@ class ReactAdapter implements LoopInterface {
      *
      * @return TimerInterface
      */
-    public function addTimer($interval, callable $callback) {
-        $timer = new Timer($this, $interval, $callback, false);
+    public function addTimer($interval, $callback) {
+        $timer = new Timer($interval, $callback, false);
 
         $watcher = $this->driver->delay((int) (1000 * $interval), function () use ($timer, $callback) {
             $this->cancelTimer($timer);
@@ -138,8 +128,8 @@ class ReactAdapter implements LoopInterface {
      *
      * @return TimerInterface
      */
-    public function addPeriodicTimer($interval, callable $callback) {
-        $timer = new Timer($this, $interval, $callback, true);
+    public function addPeriodicTimer($interval, $callback) {
+        $timer = new Timer($interval, $callback, true);
 
         $watcher = $this->driver->repeat((int) (1000 * $interval), function () use ($timer, $callback) {
             $callback($timer);
@@ -166,65 +156,16 @@ class ReactAdapter implements LoopInterface {
     }
 
     /**
-     * Check if a given timer is active.
-     *
-     * @param TimerInterface $timer The timer to check.
-     *
-     * @return boolean True if the timer is still enqueued for execution.
-     */
-    public function isTimerActive(TimerInterface $timer) {
-        return isset($this->timers[spl_object_hash($timer)]);
-    }
-
-    /**
-     * Schedule a callback to be invoked on the next tick of the event loop.
-     *
-     * Callbacks are guaranteed to be executed in the order they are enqueued,
-     * before any timer or stream events.
-     *
-     * @param callable $listener The callback to invoke.
-     */
-    public function nextTick(callable $listener) {
-        if ($this->inNextTick) {
-            $listener($this);
-
-            return;
-        }
-
-        $this->driver->defer(function () use ($listener) {
-            $previousValue = $this->inNextTick;
-            $this->inNextTick = true;
-
-            try {
-                $listener($this);
-            } finally {
-                $this->inNextTick = $previousValue;
-            }
-        });
-    }
-
-    /**
      * Schedule a callback to be invoked on a future tick of the event loop.
      *
      * Callbacks are guaranteed to be executed in the order they are enqueued.
      *
      * @param callable $listener The callback to invoke.
      */
-    public function futureTick(callable $listener) {
+    public function futureTick($listener) {
         $this->driver->defer(function () use ($listener) {
             $listener($this);
         });
-    }
-
-    /**
-     * Perform a single iteration of the event loop.
-     */
-    public function tick() {
-        $this->driver->defer(function () {
-            $this->driver->stop();
-        });
-
-        $this->run();
     }
 
     /**
@@ -241,6 +182,85 @@ class ReactAdapter implements LoopInterface {
         $this->driver->stop();
     }
 
+    /**
+     * Register a listener to be notified when a signal has been caught by this process.
+     *
+     * This is useful to catch user interrupt signals or shutdown signals from
+     * tools like `supervisor` or `systemd`.
+     *
+     * The listener callback function MUST be able to accept a single parameter,
+     * the signal added by this method or you MAY use a function which
+     * has no parameters at all.
+     *
+     * The listener callback function MUST NOT throw an `Exception`.
+     * The return value of the listener callback function will be ignored and has
+     * no effect, so for performance reasons you're recommended to not return
+     * any excessive data structures.
+     *
+     * ```php
+     * $loop->addSignal(SIGINT, function (int $signal) {
+     *     echo 'Caught user interrupt signal' . PHP_EOL;
+     * });
+     * ```
+     *
+     * See also [example #4](examples).
+     *
+     * Signaling is only available on Unix-like platform, Windows isn't
+     * supported due to operating system limitations.
+     * This method may throw a `BadMethodCallException` if signals aren't
+     * supported on this platform, for example when required extensions are
+     * missing.
+     *
+     * **Note: A listener can only be added once to the same signal, any
+     * attempts to add it more then once will be ignored.**
+     *
+     * @param int $signal
+     * @param callable $listener
+     *
+     * @throws \BadMethodCallException when signals aren't supported on this
+     *     platform, for example when required extensions are missing.
+     *
+     * @return void
+     */
+    public function addSignal($signal, $listener) {
+        if (($watcherId = $this->getSignalWatcherId($signal, $listener)) !== false) {
+            // do not add the signal handler more than once
+            return;
+        }
+
+        try {
+            $watcherId = $this->driver->onSignal($signal, $listener);
+            $this->signalWatchers[$watcherId] = [$signal, $listener];
+        } catch (Loop\UnsupportedFeatureException $e) {
+            throw new \BadMethodCallException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Removes a previously added signal listener.
+     *
+     * ```php
+     * $loop->removeSignal(SIGINT, $listener);
+     * ```
+     *
+     * Any attempts to remove listeners that aren't registered will be ignored.
+     *
+     * @param int $signal
+     * @param callable $listener
+     *
+     * @return void
+     */
+    public function removeSignal($signal, $listener) {
+        if (($watcherId = $this->getSignalWatcherId($signal, $listener)) === false) {
+            // the signal handler is not registered
+            return;
+        }
+
+        $this->driver->unreference($watcherId);
+
+        unset($this->signalWatchers[$watcherId]);
+    }
+
     public static function get(): LoopInterface {
         if ($loop = Loop::getState(self::class)) {
             return $loop;
@@ -249,5 +269,17 @@ class ReactAdapter implements LoopInterface {
         Loop::setState(self::class, $loop = new self(Loop::get()));
 
         return $loop;
+    }
+
+    /**
+     * Gets the Amp watcher id for the signal handler.
+     *
+     * @param int $signal
+     * @param callable $listener
+     *
+     * @return string|false
+     */
+    private function getSignalWatcherId(int $signal, callable $listener) {
+        return array_search([$signal, $listener], $this->signalWatchers);
     }
 }
