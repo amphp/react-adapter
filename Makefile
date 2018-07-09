@@ -3,7 +3,7 @@ PHPDBG_BIN := phpdbg
 COMPOSER_BIN := composer
 
 COVERAGE = coverage
-SRCS = lib test
+SRCS = src test
 
 find_php_files = $(shell find $(1) -type f -name "*.php")
 src = $(foreach d,$(SRCS),$(call find_php_files,$(d)))

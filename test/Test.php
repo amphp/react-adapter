@@ -3,20 +3,14 @@
 namespace Amp\ReactAdapter\Test;
 
 use Amp\Loop;
+use Amp\Loop\Driver;
+use Amp\Loop\UnsupportedFeatureException;
 use Amp\ReactAdapter\ReactAdapter;
+use React\EventLoop\Timer\Timer;
 use React\Tests\EventLoop\AbstractLoopTest;
 
 class Test extends AbstractLoopTest {
     private $fifoPath;
-
-    public function setUp() {
-        // FIXME: Remove once https://github.com/reactphp/event-loop/pull/92 is merged
-        if (!\defined("HHVM_VERSION")) {
-            \define("HHVM_VERSION", true);
-        }
-
-        parent::setUp();
-    }
 
     public function tearDown() {
         if (file_exists($this->fifoPath)) {
@@ -84,5 +78,34 @@ class Test extends AbstractLoopTest {
         $this->loop->run();
 
         $this->assertTrue((bool) ($stream1called ^ $stream2called));
+    }
+
+    public function testCancelTimerReturnsIfNotSet() {
+        $timer = new Timer(0.01, function () {});
+
+        // create the mock driver to assert no methods called
+        $driver = $this->createMock(Driver::class);
+        $driver->expects($this->never())->method($this->anything());
+        $loop = new ReactAdapter($driver);
+
+        $loop->cancelTimer($timer);
+    }
+
+    /**
+     * @expectedException \BadMethodCallException
+     * @expectedExceptionMessage phpunit test
+     */
+    public function testAddSignalUnsupportedFeatureExceptionIsCast() {
+        // set expectations
+        $signal = SIGTERM;
+        $listener = function () {};
+        $exception = new UnsupportedFeatureException('phpunit test');
+
+        // create the mock driver to throw the exception
+        $driver = $this->createMock(Driver::class);
+        $driver->method('onSignal')->with($signal, $listener)->willThrowException($exception);
+        $loop = new ReactAdapter($driver);
+
+        $loop->addSignal($signal, $listener);
     }
 }
