@@ -5,64 +5,49 @@ namespace Amp\ReactAdapter;
 use Amp\Loop;
 use Amp\Loop\Driver;
 use React\EventLoop\LoopInterface;
-use React\EventLoop\Timer\Timer;
-use React\EventLoop\Timer\TimerInterface;
+use React\EventLoop\TimerInterface;
 
 class ReactAdapter implements LoopInterface {
     private $driver;
 
-    private $inNextTick = false;
     private $readWatchers = [];
     private $writeWatchers = [];
     private $timers = [];
+    private $signals = [];
 
     public function __construct(Driver $driver) {
         $this->driver = $driver;
     }
 
-    /**
-     * Register a listener to be notified when a stream is ready to read.
-     *
-     * @param resource $stream The PHP stream resource to check.
-     * @param callable $listener Invoked when the stream is ready.
-     */
-    public function addReadStream($stream, callable $listener) {
+    /** @inheritdoc */
+    public function addReadStream($stream, $listener) {
         if (isset($this->readWatchers[(int) $stream])) {
             // Double watchers are silently ignored by ReactPHP
             return;
         }
 
-        $watcher = $this->driver->onReadable($stream, function () use ($stream, $listener) {
-            $listener($stream, $this);
+        $watcher = $this->driver->onReadable($stream, static function () use ($stream, $listener) {
+            $listener($stream);
         });
 
         $this->readWatchers[(int) $stream] = $watcher;
     }
 
-    /**
-     * Register a listener to be notified when a stream is ready to write.
-     *
-     * @param resource $stream The PHP stream resource to check.
-     * @param callable $listener Invoked when the stream is ready.
-     */
-    public function addWriteStream($stream, callable $listener) {
+    /** @inheritdoc */
+    public function addWriteStream($stream, $listener) {
         if (isset($this->writeWatchers[(int) $stream])) {
             // Double watchers are silently ignored by ReactPHP
             return;
         }
 
-        $watcher = $this->driver->onWritable($stream, function () use ($stream, $listener) {
-            $listener($stream, $this);
+        $watcher = $this->driver->onWritable($stream, static function () use ($stream, $listener) {
+            $listener($stream);
         });
 
         $this->writeWatchers[(int) $stream] = $watcher;
     }
 
-    /**
-     * Remove the read event listener for the given stream.
-     *
-     * @param resource $stream The PHP stream resource.
-     */
+    /** @inheritdoc */
     public function removeReadStream($stream) {
         $key = (int) $stream;
 
@@ -75,11 +60,7 @@ class ReactAdapter implements LoopInterface {
         unset($this->readWatchers[$key]);
     }
 
-    /**
-     * Remove the write event listener for the given stream.
-     *
-     * @param resource $stream The PHP stream resource.
-     */
+    /** @inheritdoc */
     public function removeWriteStream($stream) {
         $key = (int) $stream;
 
@@ -92,31 +73,11 @@ class ReactAdapter implements LoopInterface {
         unset($this->writeWatchers[$key]);
     }
 
-    /**
-     * Remove all listeners for the given stream.
-     *
-     * @param resource $stream The PHP stream resource.
-     */
-    public function removeStream($stream) {
-        $this->removeReadStream($stream);
-        $this->removeWriteStream($stream);
-    }
+    /** @inheritdoc */
+    public function addTimer($interval, $callback): TimerInterface {
+        $timer = new Timer($interval, $callback, false);
 
-    /**
-     * Enqueue a callback to be invoked once after the given interval.
-     *
-     * The execution order of timers scheduled to execute at the same time is
-     * not guaranteed.
-     *
-     * @param int|float $interval The number of seconds to wait before execution.
-     * @param callable  $callback The callback to invoke.
-     *
-     * @return TimerInterface
-     */
-    public function addTimer($interval, callable $callback) {
-        $timer = new Timer($this, $interval, $callback, false);
-
-        $watcher = $this->driver->delay((int) (1000 * $interval), function () use ($timer, $callback) {
+        $watcher = $this->driver->delay((int) \ceil(1000 * $interval), function () use ($timer, $callback) {
             $this->cancelTimer($timer);
 
             $callback($timer);
@@ -127,21 +88,11 @@ class ReactAdapter implements LoopInterface {
         return $timer;
     }
 
-    /**
-     * Enqueue a callback to be invoked repeatedly after the given interval.
-     *
-     * The execution order of timers scheduled to execute at the same time is
-     * not guaranteed.
-     *
-     * @param int|float $interval The number of seconds to wait before execution.
-     * @param callable  $callback The callback to invoke.
-     *
-     * @return TimerInterface
-     */
-    public function addPeriodicTimer($interval, callable $callback) {
-        $timer = new Timer($this, $interval, $callback, true);
+    /** @inheritdoc */
+    public function addPeriodicTimer($interval, $callback): TimerInterface {
+        $timer = new Timer($interval, $callback, true);
 
-        $watcher = $this->driver->repeat((int) (1000 * $interval), function () use ($timer, $callback) {
+        $watcher = $this->driver->repeat((int) \ceil(1000 * $interval), function () use ($timer, $callback) {
             $callback($timer);
         });
 
@@ -150,11 +101,7 @@ class ReactAdapter implements LoopInterface {
         return $timer;
     }
 
-    /**
-     * Cancel a pending timer.
-     *
-     * @param TimerInterface $timer The timer to cancel.
-     */
+    /** @inheritdoc */
     public function cancelTimer(TimerInterface $timer) {
         if (!isset($this->timers[spl_object_hash($timer)])) {
             return;
@@ -165,78 +112,55 @@ class ReactAdapter implements LoopInterface {
         unset($this->timers[spl_object_hash($timer)]);
     }
 
-    /**
-     * Check if a given timer is active.
-     *
-     * @param TimerInterface $timer The timer to check.
-     *
-     * @return boolean True if the timer is still enqueued for execution.
-     */
-    public function isTimerActive(TimerInterface $timer) {
-        return isset($this->timers[spl_object_hash($timer)]);
+    /** @inheritdoc */
+    public function futureTick($listener) {
+        $this->driver->defer(static function () use ($listener) {
+            $listener();
+        });
     }
 
-    /**
-     * Schedule a callback to be invoked on the next tick of the event loop.
-     *
-     * Callbacks are guaranteed to be executed in the order they are enqueued,
-     * before any timer or stream events.
-     *
-     * @param callable $listener The callback to invoke.
-     */
-    public function nextTick(callable $listener) {
-        if ($this->inNextTick) {
-            $listener($this);
-
+    /** @inheritdoc */
+    public function addSignal($signal, $listener) {
+        if (\in_array($listener, $this->signals[$signal] ?? [], true)) {
             return;
         }
 
-        $this->driver->defer(function () use ($listener) {
-            $previousValue = $this->inNextTick;
-            $this->inNextTick = true;
+        try {
+            $watcherId = $this->driver->onSignal($signal, static function () use ($listener) {
+                $listener();
+            });
 
-            try {
-                $listener($this);
-            } finally {
-                $this->inNextTick = $previousValue;
-            }
-        });
+            $this->signals[$signal][$watcherId] = $listener;
+        } catch (Loop\UnsupportedFeatureException $e) {
+            throw new \BadMethodCallException("Signals aren't available in the current environment.");
+        }
     }
 
-    /**
-     * Schedule a callback to be invoked on a future tick of the event loop.
-     *
-     * Callbacks are guaranteed to be executed in the order they are enqueued.
-     *
-     * @param callable $listener The callback to invoke.
-     */
-    public function futureTick(callable $listener) {
-        $this->driver->defer(function () use ($listener) {
-            $listener($this);
-        });
+    /** @inheritdoc */
+    public function removeSignal($signal, $listener) {
+        if (!isset($this->signals[$signal])) {
+            return;
+        }
+
+        $index = \array_search($listener, $this->signals[$signal], true);
+        if ($index === false) {
+            return;
+        }
+
+        $this->driver->cancel($index);
+
+        unset($this->signals[$signal][$index]);
+        if (empty($this->signals[$signal])) {
+            unset($this->signals[$signal]);
+        }
     }
 
-    /**
-     * Perform a single iteration of the event loop.
-     */
-    public function tick() {
-        $this->driver->defer(function () {
-            $this->driver->stop();
-        });
-
-        $this->run();
-    }
-
-    /**
-     * Run the event loop until there are no more tasks to perform.
-     */
+    /** @inheritdoc */
     public function run() {
         $this->driver->run();
     }
 
-    /**
-     * Instruct a running event loop to stop.
-     */
+    /** @inheritdoc */
     public function stop() {
         $this->driver->stop();
     }

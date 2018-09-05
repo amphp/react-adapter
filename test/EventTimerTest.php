@@ -14,18 +14,4 @@ class EventTimerTest extends TimerTest {
         Loop::set(new Loop\EventDriver);
         return ReactAdapter::get();
     }
-
-    public function testAddPeriodicTimer() {
-        $this->markTestSkipped("Often fails, needs further investigation.");
-    }
-
-    public function testAddPeriodicTimerWithCancel() {
-        $this->markTestSkipped("Often fails, needs further investigation.");
-    }
-
-    public function testAddPeriodicTimerCancelsItself() {
-        $this->markTestSkipped("Often fails, needs further investigation.");
-    }
-
-
 }
