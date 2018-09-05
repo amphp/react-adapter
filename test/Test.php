@@ -76,4 +76,30 @@ class Test extends AbstractLoopTest {
 
         $this->assertTrue((bool) ($stream1called ^ $stream2called));
     }
+
+    public function testCancelTimerReturnsIfNotSet() {
+        $timer = new Timer(0.01, function () {});
+
+        $driver = $this->createMock(Driver::class);
+        $driver->expects($this->never())->method($this->anything());
+
+        $loop = new ReactAdapter($driver);
+        $loop->cancelTimer($timer);
+    }
+
+    /**
+     * @expectedException \BadMethodCallException
+     * @expectedExceptionMessage phpunit test
+     */
+    public function testAddSignalUnsupportedFeatureExceptionIsCast() {
+        $signal = SIGTERM;
+        $listener = function () {};
+        $exception = new UnsupportedFeatureException('phpunit test');
+
+        $driver = $this->createMock(Driver::class);
+        $driver->method('onSignal')->with($signal, $listener)->willThrowException($exception);
+        
+        $loop = new ReactAdapter($driver);
+        $loop->addSignal($signal, $listener);
+    }
 }
