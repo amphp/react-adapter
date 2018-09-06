@@ -99,7 +99,7 @@ class Test extends AbstractLoopTest {
 
         $driver = $this->createMock(Driver::class);
         $driver->method('onSignal')->with($signal, $listener)->willThrowException($exception);
-        
+
         $loop = new ReactAdapter($driver);
         $loop->addSignal($signal, $listener);
     }
