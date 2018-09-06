@@ -3,7 +3,10 @@
 namespace Amp\ReactAdapter\Test;
 
 use Amp\Loop;
+use Amp\Loop\Driver;
+use Amp\Loop\UnsupportedFeatureException;
 use Amp\ReactAdapter\ReactAdapter;
+use Amp\ReactAdapter\Timer;
 use React\Tests\EventLoop\AbstractLoopTest;
 
 class Test extends AbstractLoopTest {
@@ -87,11 +90,9 @@ class Test extends AbstractLoopTest {
         $loop->cancelTimer($timer);
     }
 
-    /**
-     * @expectedException \BadMethodCallException
-     * @expectedExceptionMessage phpunit test
-     */
     public function testAddSignalUnsupportedFeatureExceptionIsCast() {
+        $this->expectException(\BadMethodCallException::class);
+
         $signal = SIGTERM;
         $listener = function () {};
         $exception = new UnsupportedFeatureException('phpunit test');
