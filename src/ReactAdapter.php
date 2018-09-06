@@ -83,6 +83,7 @@ class ReactAdapter implements LoopInterface {
             $callback($timer);
         });
 
+        $this->deferEnabling($watcher);
         $this->timers[spl_object_hash($timer)] = $watcher;
 
         return $timer;
@@ -96,6 +97,7 @@ class ReactAdapter implements LoopInterface {
             $callback($timer);
         });
 
+        $this->deferEnabling($watcher);
         $this->timers[spl_object_hash($timer)] = $watcher;
 
         return $timer;
@@ -163,6 +165,17 @@ class ReactAdapter implements LoopInterface {
     /** @inheritdoc */
     public function stop() {
         $this->driver->stop();
+    }
+
+    private function deferEnabling(string $watcherId) {
+        $this->driver->disable($watcherId);
+        $this->driver->defer(function () use ($watcherId) {
+            try {
+                $this->driver->enable($watcherId);
+            } catch (\Throwable $e) {
+                // ignore
+            }
+        });
     }
 
     public static function get(): LoopInterface {
