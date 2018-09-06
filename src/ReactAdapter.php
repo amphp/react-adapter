@@ -77,7 +77,7 @@ class ReactAdapter implements LoopInterface {
     public function addTimer($interval, $callback): TimerInterface {
         $timer = new Timer($interval, $callback, false);
 
-        $watcher = $this->driver->delay((int) \ceil(1000 * $interval), function () use ($timer, $callback) {
+        $watcher = $this->driver->delay((int) \ceil(1000 * $timer->getInterval()), function () use ($timer, $callback) {
             $this->cancelTimer($timer);
 
             $callback($timer);
@@ -93,7 +93,7 @@ class ReactAdapter implements LoopInterface {
     public function addPeriodicTimer($interval, $callback): TimerInterface {
         $timer = new Timer($interval, $callback, true);
 
-        $watcher = $this->driver->repeat((int) \ceil(1000 * $interval), function () use ($timer, $callback) {
+        $watcher = $this->driver->repeat((int) \ceil(1000 * $timer->getInterval()), function () use ($timer, $callback) {
             $callback($timer);
         });
 

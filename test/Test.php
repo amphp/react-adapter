@@ -7,6 +7,7 @@ use Amp\Loop\Driver;
 use Amp\Loop\UnsupportedFeatureException;
 use Amp\ReactAdapter\ReactAdapter;
 use Amp\ReactAdapter\Timer;
+use React\EventLoop\LoopInterface;
 use React\Tests\EventLoop\AbstractLoopTest;
 
 class Test extends AbstractLoopTest {
@@ -43,7 +44,7 @@ class Test extends AbstractLoopTest {
         fwrite($stream, $content);
     }
 
-    public function createLoop() {
+    public function createLoop(): LoopInterface {
         Loop::set(new Loop\NativeDriver);
         return ReactAdapter::get();
     }

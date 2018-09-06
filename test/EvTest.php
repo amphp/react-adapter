@@ -4,11 +4,10 @@ namespace Amp\ReactAdapter\Test;
 
 use Amp\Loop;
 use Amp\ReactAdapter\ReactAdapter;
-
-// Bug report: None
+use React\EventLoop\LoopInterface;
 
 class EvTest extends Test {
-    public function createLoop() {
+    public function createLoop(): LoopInterface {
         if (!Loop\EvDriver::isSupported()) {
             $this->markTestSkipped("EV extension required");
         }
