@@ -21,12 +21,17 @@ matrix:
     - php: nightly
   fast_finish: true
 
+env:
+  - AMP_DEBUG=true
+
 install:
+  - travis/install-uv.sh
+  - travis/install-ev.sh
+  - travis/install-event.sh
+
   - composer update -n --prefer-dist
-  - vendor/amphp/amp/travis/install-uv.sh
-  - vendor/amphp/amp/travis/install-ev.sh
-  - vendor/amphp/amp/travis/install-event.sh
-  - wget https://github.com/php-coveralls/php-coveralls/releases/download/v1.0.0/coveralls.phar
+
+  - curl -OL https://github.com/php-coveralls/php-coveralls/releases/download/v1.0.0/coveralls.phar
   - chmod +x coveralls.phar
 
 script:
@@ -38,4 +43,5 @@ after_script:
 
 cache:
   directories:
-    - $HOME/.composer/cache/files
+    - $HOME/.composer/cache
+    - $HOME/.php-cs-fixer
