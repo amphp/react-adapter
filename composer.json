@@ -23,7 +23,10 @@
     "autoload": {
         "psr-4": {
             "Amp\\ReactAdapter\\": "src"
-        }
+        },
+        "files": [
+            "etc/Factory.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
