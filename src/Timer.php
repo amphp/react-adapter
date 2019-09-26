@@ -4,7 +4,8 @@ namespace Amp\ReactAdapter;
 
 use React\EventLoop\TimerInterface;
 
-class Timer implements TimerInterface {
+class Timer implements TimerInterface
+{
     /** @var float */
     private $interval;
 
@@ -14,7 +15,8 @@ class Timer implements TimerInterface {
     /** @var bool */
     private $periodic;
 
-    public function __construct(float $interval, callable $callback, bool $periodic = false) {
+    public function __construct(float $interval, callable $callback, bool $periodic = false)
+    {
         if ($interval < 0.000001) {
             $interval = 0.000001;
         }
@@ -25,17 +27,20 @@ class Timer implements TimerInterface {
     }
 
     /** @inheritdoc */
-    public function getInterval(): float {
+    public function getInterval(): float
+    {
         return $this->interval;
     }
 
     /** @inheritdoc */
-    public function getCallback(): callable {
+    public function getCallback(): callable
+    {
         return $this->callback;
     }
 
     /** @inheritdoc */
-    public function isPeriodic(): bool {
+    public function isPeriodic(): bool
+    {
         return $this->periodic;
     }
 }

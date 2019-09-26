@@ -6,8 +6,10 @@ use Amp\Loop;
 use Amp\ReactAdapter\ReactAdapter;
 use React\EventLoop\LoopInterface;
 
-class EventTest extends Test {
-    public function createLoop(): LoopInterface {
+class EventTest extends Test
+{
+    public function createLoop(): LoopInterface
+    {
         if (!Loop\EventDriver::isSupported()) {
             $this->markTestSkipped("Event extension required");
         }

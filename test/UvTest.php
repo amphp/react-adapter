@@ -6,8 +6,10 @@ use Amp\Loop;
 use Amp\ReactAdapter\ReactAdapter;
 use React\EventLoop\LoopInterface;
 
-class UvTest extends Test {
-    public function createLoop(): LoopInterface {
+class UvTest extends Test
+{
+    public function createLoop(): LoopInterface
+    {
         if (!Loop\UvDriver::isSupported()) {
             $this->markTestSkipped("UV extension required");
         }

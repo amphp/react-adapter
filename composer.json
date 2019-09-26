@@ -17,8 +17,8 @@
         "react/event-loop": "^0.5 || ^1"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6.4",
-        "friendsofphp/php-cs-fixer": "^2.3"
+        "phpunit/phpunit": "^7 || ^6.4",
+        "amphp/php-cs-fixer-config": "dev-master"
     },
     "autoload": {
         "psr-4": {
@@ -29,11 +29,6 @@
         "psr-4": {
             "Amp\\ReactAdapter\\Test\\": "test",
             "React\\Tests\\EventLoop\\": "vendor/react/event-loop/tests"
-        }
-    },
-    "config": {
-        "platform": {
-            "php": "7.0.0"
         }
     }
 }

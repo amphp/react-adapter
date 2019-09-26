@@ -10,46 +10,52 @@ use Amp\ReactAdapter\Timer;
 use React\EventLoop\LoopInterface;
 use React\Tests\EventLoop\AbstractLoopTest;
 
-class Test extends AbstractLoopTest {
+class Test extends AbstractLoopTest
+{
     private $fifoPath;
 
-    public function tearDown() {
-        if (file_exists($this->fifoPath)) {
-            unlink($this->fifoPath);
+    public function tearDown()
+    {
+        if (\file_exists($this->fifoPath)) {
+            \unlink($this->fifoPath);
         }
     }
 
-    public function createStream() {
+    public function createStream()
+    {
         // Ev: No report (https://bitbucket.org/osmanov/pecl-ev/issues)
         // Event: Won't fix (https://bitbucket.org/osmanov/pecl-event/issues/2/add-support-of-php-temp)
         // Uv: Open (https://github.com/bwoebi/php-uv/issues/35)
 
-        if (strtoupper(substr(PHP_OS, 0, 3)) === "WIN") {
+        if (\strtoupper(\substr(PHP_OS, 0, 3)) === "WIN") {
             return parent::createStream();
         }
 
-        $this->fifoPath = tempnam(sys_get_temp_dir(), "amphp-react-adapter-");
+        $this->fifoPath = \tempnam(\sys_get_temp_dir(), "amphp-react-adapter-");
 
-        unlink($this->fifoPath);
-        posix_mkfifo($this->fifoPath, 0600);
+        \unlink($this->fifoPath);
+        \posix_mkfifo($this->fifoPath, 0600);
 
-        return fopen($this->fifoPath, 'r+');
+        return \fopen($this->fifoPath, 'r+');
     }
 
-    public function writeToStream($stream, $content) {
-        if (strtoupper(substr(PHP_OS, 0, 3)) === "WIN") {
+    public function writeToStream($stream, $content)
+    {
+        if (\strtoupper(\substr(PHP_OS, 0, 3)) === "WIN") {
             parent::writeToStream($stream, $content);
         }
 
-        fwrite($stream, $content);
+        \fwrite($stream, $content);
     }
 
-    public function createLoop(): LoopInterface {
+    public function createLoop(): LoopInterface
+    {
         Loop::set(new Loop\NativeDriver);
         return ReactAdapter::get();
     }
 
-    public function testIgnoreRemovedCallback() {
+    public function testIgnoreRemovedCallback()
+    {
         // We don't have the order guarantee, so we recreate this test
         // and accept that one handler is called, but not the other.
 
@@ -81,7 +87,8 @@ class Test extends AbstractLoopTest {
         $this->assertTrue((bool) ($stream1called ^ $stream2called));
     }
 
-    public function testCancelTimerReturnsIfNotSet() {
+    public function testCancelTimerReturnsIfNotSet()
+    {
         $timer = new Timer(0.01, function () {});
 
         $driver = $this->createMock(Driver::class);
@@ -91,7 +98,8 @@ class Test extends AbstractLoopTest {
         $loop->cancelTimer($timer);
     }
 
-    public function testAddSignalUnsupportedFeatureExceptionIsCast() {
+    public function testAddSignalUnsupportedFeatureExceptionIsCast()
+    {
         $this->expectException(\BadMethodCallException::class);
 
         $signal = SIGTERM;

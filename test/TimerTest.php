@@ -8,8 +8,10 @@ use Amp\ReactAdapter\ReactAdapter;
 use React\EventLoop\LoopInterface;
 use React\Tests\EventLoop\Timer\AbstractTimerTest;
 
-class TimerTest extends AbstractTimerTest {
-    public function createLoop(): LoopInterface {
+class TimerTest extends AbstractTimerTest
+{
+    public function createLoop(): LoopInterface
+    {
         Loop::set(new NativeDriver);
         return ReactAdapter::get();
     }

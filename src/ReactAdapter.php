@@ -7,7 +7,8 @@ use Amp\Loop\Driver;
 use React\EventLoop\LoopInterface;
 use React\EventLoop\TimerInterface;
 
-class ReactAdapter implements LoopInterface {
+class ReactAdapter implements LoopInterface
+{
     private $driver;
 
     private $readWatchers = [];
@@ -15,12 +16,25 @@ class ReactAdapter implements LoopInterface {
     private $timers = [];
     private $signals = [];
 
-    public function __construct(Driver $driver) {
+    public static function get(): LoopInterface
+    {
+        if ($loop = Loop::getState(self::class)) {
+            return $loop;
+        }
+
+        Loop::setState(self::class, $loop = new self(Loop::get()));
+
+        return $loop;
+    }
+
+    public function __construct(Driver $driver)
+    {
         $this->driver = $driver;
     }
 
     /** @inheritdoc */
-    public function addReadStream($stream, $listener) {
+    public function addReadStream($stream, $listener)
+    {
         if (isset($this->readWatchers[(int) $stream])) {
             // Double watchers are silently ignored by ReactPHP
             return;
@@ -34,7 +48,8 @@ class ReactAdapter implements LoopInterface {
     }
 
     /** @inheritdoc */
-    public function addWriteStream($stream, $listener) {
+    public function addWriteStream($stream, $listener)
+    {
         if (isset($this->writeWatchers[(int) $stream])) {
             // Double watchers are silently ignored by ReactPHP
             return;
@@ -48,7 +63,8 @@ class ReactAdapter implements LoopInterface {
     }
 
     /** @inheritdoc */
-    public function removeReadStream($stream) {
+    public function removeReadStream($stream)
+    {
         $key = (int) $stream;
 
         if (!isset($this->readWatchers[$key])) {
@@ -61,7 +77,8 @@ class ReactAdapter implements LoopInterface {
     }
 
     /** @inheritdoc */
-    public function removeWriteStream($stream) {
+    public function removeWriteStream($stream)
+    {
         $key = (int) $stream;
 
         if (!isset($this->writeWatchers[$key])) {
@@ -74,7 +91,8 @@ class ReactAdapter implements LoopInterface {
     }
 
     /** @inheritdoc */
-    public function addTimer($interval, $callback): TimerInterface {
+    public function addTimer($interval, $callback): TimerInterface
+    {
         $timer = new Timer($interval, $callback, false);
 
         $watcher = $this->driver->delay((int) \ceil(1000 * $timer->getInterval()), function () use ($timer, $callback) {
@@ -84,13 +102,14 @@ class ReactAdapter implements LoopInterface {
         });
 
         $this->deferEnabling($watcher);
-        $this->timers[spl_object_hash($timer)] = $watcher;
+        $this->timers[\spl_object_hash($timer)] = $watcher;
 
         return $timer;
     }
 
     /** @inheritdoc */
-    public function addPeriodicTimer($interval, $callback): TimerInterface {
+    public function addPeriodicTimer($interval, $callback): TimerInterface
+    {
         $timer = new Timer($interval, $callback, true);
 
         $watcher = $this->driver->repeat((int) \ceil(1000 * $timer->getInterval()), function () use ($timer, $callback) {
@@ -98,31 +117,34 @@ class ReactAdapter implements LoopInterface {
         });
 
         $this->deferEnabling($watcher);
-        $this->timers[spl_object_hash($timer)] = $watcher;
+        $this->timers[\spl_object_hash($timer)] = $watcher;
 
         return $timer;
     }
 
     /** @inheritdoc */
-    public function cancelTimer(TimerInterface $timer) {
-        if (!isset($this->timers[spl_object_hash($timer)])) {
+    public function cancelTimer(TimerInterface $timer)
+    {
+        if (!isset($this->timers[\spl_object_hash($timer)])) {
             return;
         }
 
-        $this->driver->cancel($this->timers[spl_object_hash($timer)]);
+        $this->driver->cancel($this->timers[\spl_object_hash($timer)]);
 
-        unset($this->timers[spl_object_hash($timer)]);
+        unset($this->timers[\spl_object_hash($timer)]);
     }
 
     /** @inheritdoc */
-    public function futureTick($listener) {
+    public function futureTick($listener)
+    {
         $this->driver->defer(static function () use ($listener) {
             $listener();
         });
     }
 
     /** @inheritdoc */
-    public function addSignal($signal, $listener) {
+    public function addSignal($signal, $listener)
+    {
         if (\in_array($listener, $this->signals[$signal] ?? [], true)) {
             return;
         }
@@ -139,7 +161,8 @@ class ReactAdapter implements LoopInterface {
     }
 
     /** @inheritdoc */
-    public function removeSignal($signal, $listener) {
+    public function removeSignal($signal, $listener)
+    {
         if (!isset($this->signals[$signal])) {
             return;
         }
@@ -158,16 +181,19 @@ class ReactAdapter implements LoopInterface {
     }
 
     /** @inheritdoc */
-    public function run() {
+    public function run()
+    {
         $this->driver->run();
     }
 
     /** @inheritdoc */
-    public function stop() {
+    public function stop()
+    {
         $this->driver->stop();
     }
 
-    private function deferEnabling(string $watcherId) {
+    private function deferEnabling(string $watcherId)
+    {
         $this->driver->disable($watcherId);
         $this->driver->defer(function () use ($watcherId) {
             try {
@@ -176,15 +202,5 @@ class ReactAdapter implements LoopInterface {
                 // ignore
             }
         });
-    }
-
-    public static function get(): LoopInterface {
-        if ($loop = Loop::getState(self::class)) {
-            return $loop;
-        }
-
-        Loop::setState(self::class, $loop = new self(Loop::get()));
-
-        return $loop;
     }
 }

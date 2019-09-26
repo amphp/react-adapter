@@ -6,8 +6,10 @@ use Amp\Loop;
 use Amp\ReactAdapter\ReactAdapter;
 use React\EventLoop\LoopInterface;
 
-class UvTimerTest extends TimerTest {
-    public function createLoop(): LoopInterface {
+class UvTimerTest extends TimerTest
+{
+    public function createLoop(): LoopInterface
+    {
         if (!Loop\UvDriver::isSupported()) {
             $this->markTestSkipped("UV extension required");
         }
