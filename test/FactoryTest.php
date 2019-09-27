@@ -10,6 +10,7 @@ class FactoryTest extends TestCase
 {
     public function testFactoryReturnsAdaptor()
     {
+        \define(Factory::SILENCE_CONST_NAME, true);
         $loop = Factory::create();
         $this->assertInstanceOf(ReactAdapter::class, $loop);
     }
