@@ -12,13 +12,14 @@ composer require amphp/react-adapter
 
 ## Usage
 
-Everywhere where a ReactPHP library requires an instance of `LoopInterface`, you just pass `ReactAdapter::get()` to run the ReactPHP library on the Amp event loop.
+Everywhere where a ReactPHP library requires an instance of `LoopInterface`, you just pass `ReactAdapter::get()` to run the ReactPHP library on Amp's event loop.
 
 ```php
 <?php
 
 require 'vendor/autoload.php';
 
+use Amp\Loop;
 use Amp\ReactAdapter\ReactAdapter;
 
 Loop::run(function () {
