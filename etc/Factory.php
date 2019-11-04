@@ -4,32 +4,29 @@ namespace React\EventLoop;
 
 use Amp\ReactAdapter\ReactAdapter;
 
-/**
- * Class used to overwrite React's loop factory with an implementation returning the adaptor.
- *
- * @noinspection PhpUndefinedClassInspection
- */
-final class Factory
-{
-    const SILENCE_CONST_NAME = 'AMP_SILENCE_REACT_LOOP_FACTORY_NOTICE';
+(static function () {
+    $constName = 'AMP_REACT_ADAPTER_DISABLE_FACTORY_OVERRIDE';
 
-    private static $noticeIssued = false;
+    $env = \getenv($constName) ?: '0';
+    $env = ($env !== '0' && $env !== 'false');
+    $const = \defined($constName) && \constant($constName);
 
-    public static function create(): LoopInterface
-    {
-        if (!self::$noticeIssued) {
-            self::$noticeIssued = true;
-
-            $env = \getenv(self::SILENCE_CONST_NAME) ?: '0';
-            $env = ($env !== '0' && $env !== 'false');
-            $const = \defined(self::SILENCE_CONST_NAME) && \constant(self::SILENCE_CONST_NAME);
-            if (!$const && !$env) {
-                \trigger_error(__METHOD__ . "() overridden to return Amp's adapted event loop; "
-                    . "this notice may be silenced by defining a constant or environment variable named "
-                    . self::SILENCE_CONST_NAME, E_USER_NOTICE);
+    if (!$const && !$env) {
+        /**
+         * Class used to overwrite React's loop factory with an implementation throwing an error.
+         *
+         * @noinspection PhpUndefinedClassInspection
+         */
+        final class Factory
+        {
+            public static function create(): LoopInterface
+            {
+                throw new \Error(
+                    __METHOD__ . '() has been overridden by amphp/react-adapter to prevent you from accidentally creating two event loop instances. ' .
+                    'Use ' . ReactAdapter::class . '::get() instead of React\EventLoop\Factory::create() to ensure everything is running on the same event loop. ' .
+                    'You may set a constant or environment variable named AMP_REACT_ADAPTER_DISABLE_FACTORY_OVERRIDE to disable this protection or open an issue at https://github.com/amphp/react-adapter if you\'re unsure on the right way forward.'
+                );
             }
         }
-
-        return ReactAdapter::get();
     }
-}
+})();
