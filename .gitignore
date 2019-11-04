@@ -1,5 +1,7 @@
 .php_cs.cache
 build
+coverage
 composer.lock
+docs/Gemfile.lock
 phpunit.xml
 vendor
