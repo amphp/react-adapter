@@ -29,7 +29,7 @@ install:
   - travis/install-ev.sh
   - travis/install-event.sh
 
-  - composer update -n --prefer-dist
+  - composer update -n --prefer-source
 
   - curl -OL https://github.com/php-coveralls/php-coveralls/releases/download/v1.0.0/coveralls.phar
   - chmod +x coveralls.phar
