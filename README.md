@@ -5,7 +5,7 @@
 ![Stable](https://img.shields.io/badge/stability-stable-green.svg?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)
 
-`amphp/react-adapter` makes any [ReactPHP](https://reactphp.org/) library compatible with [Amp](https://github.com/amphp/amp).
+`amphp/react-adapter` makes any [ReactPHP](https://reactphp.org/) library compatible with [Revolt's event loop](https://revolt.run) and v3 of [Amp](https://github.com/amphp/amp).
 
 ## Installation
 
@@ -15,17 +15,17 @@ composer require amphp/react-adapter
 
 ## Usage
 
-Everywhere where a ReactPHP library requires an instance of `LoopInterface`, you just pass `ReactAdapter::get()` to run the ReactPHP library on Amp's event loop.
+Everywhere where a ReactPHP library requires an instance of `LoopInterface`, you just pass `ReactAdapter::get()` to run the ReactPHP library on [Revolt](https://revolt.run/) event loop.
 
 ```php
 <?php
 
 require 'vendor/autoload.php';
 
-use Amp\Loop;
+use Revolt\EventLoop;
 use Amp\ReactAdapter\ReactAdapter;
 
-Loop::run(function () {
+EventLoop::defer(function () {
     $app = function ($request, $response) {
         $response->writeHead(200, array('Content-Type' => 'text/plain'));
         $response->end("Hello World\n");
@@ -41,10 +41,10 @@ Loop::run(function () {
 });
 ```
 
-You can also use the adapter to run ReactPHP apps on an Amp event loop implementation without relying on Amp's global event loop.
+You can also use the adapter to run ReactPHP apps on an [Revolt](https://revolt.run/) event loop implementation without relying on Revolt's global event loop.
 
 ```php
-$loop = new Amp\ReactAdapter\ReactAdapter((new Amp\Loop\DriverFactory)->create());
+$loop = new Amp\ReactAdapter\ReactAdapter((new Revolt\EventLoop\DriverFactory)->create());
 ```
 
 ## Documentation
