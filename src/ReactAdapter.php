@@ -95,7 +95,7 @@ class ReactAdapter implements LoopInterface
     {
         $timer = new Timer($interval, $callback, false);
 
-        $watcher = $this->driver->delay((int) \ceil(1000 * $timer->getInterval()), function () use ($timer, $callback) {
+        $watcher = $this->driver->delay((int) \min(\PHP_INT_MAX, \ceil(1000 * $timer->getInterval())), function () use ($timer, $callback) {
             $this->cancelTimer($timer);
 
             $callback($timer);
