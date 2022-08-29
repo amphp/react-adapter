@@ -1,11 +1,12 @@
 # react-adapter
 
-[![Build Status](https://img.shields.io/travis/amphp/react-adapter/master.svg?style=flat-square)](https://travis-ci.org/amphp/react-adapter)
-[![Coverage Status](https://img.shields.io/coveralls/amphp/react-adapter/master.svg?style=flat-square)](https://coveralls.io/github/amphp/react-adapter?branch=master)
 ![Stable](https://img.shields.io/badge/stability-stable-green.svg?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)
 
 `amphp/react-adapter` makes any [ReactPHP](https://reactphp.org/) library compatible with [Amp](https://github.com/amphp/amp).
+
+> **Note**
+> If you're using AMPHP v3, have a look at [`revolt/event-loop-adapter-react`](https://github.com/revoltphp/event-loop-adapter-react) instead.
 
 ## Installation
 
